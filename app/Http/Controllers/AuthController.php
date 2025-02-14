@@ -22,7 +22,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
-            'phone' => $fields['phone'],
+            'phone' => isset($fields['phone']) ? $fields['phone'] : null,
             'password' => bcrypt($fields['password'])
         ]);
 
@@ -69,7 +69,7 @@ class AuthController extends Controller
 
         $response = [
             'success' => true,
-            'message' => 'User registered',
+            'message' => 'User logged in successfully',
             'data'=>[
                 'user' => $user,
                 'token' => $token
