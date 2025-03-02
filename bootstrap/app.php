@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CoordinatesDetector;
 use App\Http\Middleware\Locale;
 use App\Http\Middleware\SetAuthRole;
 use Illuminate\Foundation\Application;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(Locale::class);
+        $middleware->append(CoordinatesDetector::class);
         $middleware->alias([
             'setAuthRole' => SetAuthRole::class,
             'checkRole' => CheckRole::class
