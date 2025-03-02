@@ -12,7 +12,7 @@ class Role extends Model
 
     protected $fillable = ['name'];
 
-    public $translatable = ['name'];
+    protected $translatable = ['name'];
 
     public function users():BelongsToMany{
         return $this->belongsToMany(User::class);
