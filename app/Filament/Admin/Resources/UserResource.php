@@ -6,6 +6,7 @@ use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Filament\Admin\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -19,13 +20,26 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
-    protected static ?string $navigationGroup = 'Operations';
+    protected static ?string $navigationGroup = 'Users';
+
+    protected static ?int $navigationSort = 1;
+
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                TextInput::make("name")
+                    ->required(),
+                TextInput::make("email")
+                    ->required()
+                    ->email(),                    
+                TextInput::make("password")
+                    ->hiddenOn('edit')
+                    ->required()                    
+                    ->password(),
+                TextInput::make("phone")                   
+                    ->tel(),
             ]);
     }
 
@@ -35,6 +49,8 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->sortable()
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
@@ -53,7 +69,8 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultPaginationPageOption(10);            
     }
 
     public static function getRelations(): array
