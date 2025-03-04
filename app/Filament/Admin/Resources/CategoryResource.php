@@ -14,6 +14,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
 class CategoryResource extends Resource
 {
@@ -32,6 +34,9 @@ class CategoryResource extends Resource
             ->schema([
                 TextInput::make('name')
                     ->required()
+                    ->translatable(),
+                SpatieMediaLibraryFileUpload::make('icon')
+                    ->collection('icon')
             ]);
     }
 
@@ -39,6 +44,8 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('icon')
+                    ->collection('icon'),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
