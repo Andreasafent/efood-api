@@ -12,8 +12,10 @@ class Category extends Model implements HasMedia
     use HasTranslations, InteractsWithMedia;
     protected $translatable = ['name'];
     protected $fillable = ['name'];
+    protected $hidden = ['pivot'];
 
-    protected $appends = ['icon'];
+
+    // protected $appends = ['icon'];
 
     public function stores()
     {

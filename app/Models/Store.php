@@ -21,7 +21,10 @@ class Store extends Model
     ];
     protected $translatable = ['name', 'address'];
 
-    protected $appends = ['logo', 'cover'];
+    // protected $appends = ['logo', 'cover'];
+    
+    protected $hidden = ['pivot'];
+
 
     protected $casts = [
         'working_hours' => 'array',
@@ -30,6 +33,14 @@ class Store extends Model
 
     public function categories(){
         return $this->belongsToMany(Category::class);
+    }
+
+    public function productCategories(){
+        return $this->hasMany(ProductCategory::class);
+    }
+
+    public function products(){
+        return $this->hasMany(Product::class);
     }
 
     public function getLogoAttribute()
