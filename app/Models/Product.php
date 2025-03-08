@@ -19,6 +19,12 @@ class Product extends Model
         'active',
         'sort',
     ];
+
+    protected $casts = [
+        'active' => 'boolean',
+        'price' => 'float',
+        'sort' => 'integer',
+    ];
     public function store(){
         return $this->belongsTo(Store::class);
     }

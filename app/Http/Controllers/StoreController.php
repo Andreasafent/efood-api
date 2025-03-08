@@ -121,7 +121,20 @@ class StoreController extends Controller
                     'product_categories.name',
                     'product_categories.store_id',
                 );
-            }            
+                $subQuery->orderBy('product_categories.sort');
+            },
+            'productCategories.products' => function ($subQuery) {
+                $subQuery->select(
+                    'products.id',
+                    'products.name',
+                    'products.description',
+                    'products.price',
+                    'products.active',
+                    'products.store_id',
+                    'products.product_category_id',
+                );
+                $subQuery->orderBy('products.sort');
+            }          
         ]);
 
         $store = $query->first();
