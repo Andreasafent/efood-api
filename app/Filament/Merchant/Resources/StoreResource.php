@@ -7,11 +7,13 @@ use App\Filament\Merchant\Resources\StoreResource\RelationManagers;
 use App\Models\Store;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -22,7 +24,7 @@ class StoreResource extends Resource
 {
     protected static ?string $model = Store::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
     public static function getEloquentQuery(): Builder
     {
@@ -36,7 +38,7 @@ class StoreResource extends Resource
             ->schema([
                 Section::make('Basic Information')
                     ->aside()
-                    ->description('Name, address, phone number...')
+                    ->description('Name, address, categories, phone number...')
                     ->schema([
                         TextInput::make('name')
                             ->required()
@@ -44,6 +46,10 @@ class StoreResource extends Resource
                         TextInput::make('address')
                             ->required()
                             ->translatable(),
+                        Select::make('categories')
+                            ->preload()
+                            ->multiple()
+                            ->relationship(titleAttribute:'name'),
                         TextInput::make('phone')
                             ->tel()
                     ]),
@@ -87,9 +93,16 @@ class StoreResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('logo')
+                    ->collection('logo'),
                 TextColumn::make('name')
                     ->searchable()
-                    ->sortable()
+                    ->sortable(),
+                TextColumn::make('address'),
+                TextColumn::make('categories.name'),
+                TextColumn::make('minimum_cart_value')
+                    ->money("EUR"),
+                TextColumn::make('delivery_range')->suffix(' km')
             ])
             ->filters([
                 //
