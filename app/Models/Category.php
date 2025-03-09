@@ -25,7 +25,7 @@ class Category extends Model implements HasMedia
     public function getIconAttribute()
     {
         $icon = $this->getFirstMediaUrl('icon');
-        return $icon? : 'https://static.vecteezy.com/system/resources/previews/049/351/008/non_2x/microsoft-lists-icon-logo-symbol-free-png.png';
+        return $icon ?? 'https://static.vecteezy.com/system/resources/previews/049/351/008/non_2x/microsoft-lists-icon-logo-symbol-free-png.png';
     }
 
 }

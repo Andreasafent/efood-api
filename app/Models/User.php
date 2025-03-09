@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enum\RoleCode;
+use Filament\Notifications\Auth\ResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -58,8 +59,11 @@ class User extends Authenticatable implements FilamentUser
         $panel_id = $panel->getId(); // "admin" or "merchant"
         if($panel_id === 'admin'){
             $role = $this->roles()->where('role_id', RoleCode::admin)->first();
-
             return !is_null($role);
+        }else if($panel_id === 'merchant'){
+            // $role = $this->roles()->where('role_id', RoleCode::merchant)->first();
+            // return !is_null($role);
+            return true;
         }
         
         return false;
@@ -71,5 +75,12 @@ class User extends Authenticatable implements FilamentUser
 
     public function addresses(): HasMany{
         return $this->hasMany(Address::class);
-    }  
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $url = url("/admin/reset-password?token={$token}");
+
+        $this->notify(new ResetPassword($token));
+    }
 }
