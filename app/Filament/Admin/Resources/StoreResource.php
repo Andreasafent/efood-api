@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Filament\Merchant\Resources;
+namespace App\Filament\Admin\Resources;
 
-use App\Filament\Merchant\Resources\StoreResource\Pages;
-use App\Filament\Merchant\Resources\StoreResource\RelationManagers;
-use App\Filament\Merchant\Resources\StoreResource\RelationManagers\ProductCategoriesRelationManager;
+use App\Filament\Admin\Resources\StoreResource\Pages;
+use App\Filament\Admin\Resources\StoreResource\RelationManagers;
 use App\Models\Store;
+use ArberMustafa\FilamentLocationPickrField\Forms\Components\LocationPickr;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -19,7 +19,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use ArberMustafa\FilamentLocationPickrField\Forms\Components\LocationPickr;
 
 class StoreResource extends Resource
 {
@@ -27,11 +26,8 @@ class StoreResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
 
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->where("user_id", auth()->user()->id);
-    }
+    protected static ?string $navigationGroup = 'Stores';
+
 
     public static function form(Form $form): Form
     {
@@ -96,6 +92,10 @@ class StoreResource extends Resource
             ->columns([
                 SpatieMediaLibraryImageColumn::make('logo')
                     ->collection('logo'),
+                TextColumn::make('user.name')
+                    ->description(fn (Store $record):string => $record->user->email)
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),
@@ -121,7 +121,7 @@ class StoreResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProductCategoriesRelationManager::class
+            //
         ];
     }
 
