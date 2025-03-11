@@ -4,6 +4,8 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\StoreResource\Pages;
 use App\Filament\Admin\Resources\StoreResource\RelationManagers;
+use App\Filament\Admin\Resources\StoreResource\RelationManagers\ProductCategoriesRelationManager;
+use App\Filament\Admin\Resources\StoreResource\RelationManagers\ProductsRelationManager;
 use App\Models\Store;
 use ArberMustafa\FilamentLocationPickrField\Forms\Components\LocationPickr;
 use Filament\Forms;
@@ -121,7 +123,8 @@ class StoreResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductCategoriesRelationManager::class,
+            ProductsRelationManager::class
         ];
     }
 

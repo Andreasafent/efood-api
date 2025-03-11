@@ -30,7 +30,7 @@ class MerchantPanelProvider extends PanelProvider
             ->registration()
             ->passwordReset()
             ->colors([
-                'primary' => Color::Red,
+                'primary' => Color::Lime,
             ])
             ->plugins([
                 FilamentTranslatableFieldsPlugin::make()
