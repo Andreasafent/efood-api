@@ -5,16 +5,17 @@ namespace App\Filament\Merchant\Resources;
 use App\Filament\Merchant\Resources\StoreResource\Pages;
 use App\Filament\Merchant\Resources\StoreResource\RelationManagers;
 use App\Filament\Merchant\Resources\StoreResource\RelationManagers\ProductCategoriesRelationManager;
+use App\Filament\Merchant\Resources\StoreResource\RelationManagers\ProductsRelationManager;
 use App\Models\Store;
 use Filament\Forms;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -121,7 +122,8 @@ class StoreResource extends Resource
     public static function getRelations(): array
     {
         return [
-            ProductCategoriesRelationManager::class
+            ProductCategoriesRelationManager::class,
+            ProductsRelationManager::class
         ];
     }
 

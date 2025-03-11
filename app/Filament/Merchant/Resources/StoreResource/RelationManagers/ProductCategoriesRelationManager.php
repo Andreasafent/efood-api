@@ -35,6 +35,8 @@ class ProductCategoriesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->defaultSort("sort")
+            ->reorderable("sort")
             ->columns([
                 Tables\Columns\TextColumn::make('name'),
             ])
