@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\UserResource\Pages;
 use App\Filament\Admin\Resources\UserResource\RelationManagers;
 use App\Filament\Admin\Resources\UserResource\RelationManagers\AddressesRelationManager;
+use App\Filament\Admin\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
@@ -77,7 +78,8 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            AddressesRelationManager::class
+            AddressesRelationManager::class,
+            RolesRelationManager::class
         ];
     }
 

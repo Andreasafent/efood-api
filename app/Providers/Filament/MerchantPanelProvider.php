@@ -26,6 +26,7 @@ class MerchantPanelProvider extends PanelProvider
         return $panel
             ->id('merchant')
             ->path('merchant')
+            ->profile()
             ->login()
             ->registration()
             ->passwordReset()
