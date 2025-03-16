@@ -83,4 +83,14 @@ class User extends Authenticatable implements FilamentUser
 
         $this->notify(new ResetPassword($token));
     }
+
+    public function orders(): HasMany{
+        return $this->hasMany(Order::class);
+    }
+
+    public function stores(): HasMany{
+        return $this->hasMany(Store::class);
+    }
+
+
 }

@@ -132,7 +132,7 @@ return [
     |--------------------------------------------------------------------------|
     */
 
-    'estimated_delivery_time' => [
+    'delivery_time' => [
         'minutes_per_km' => 2,
         'minutes_per_item' => 3,
         'mintues_per_store_order' => 4,
