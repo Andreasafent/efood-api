@@ -58,7 +58,7 @@ class OrderController extends Controller
             return response()->json($response, 404);
         }
 
-        $distanceInKm = DB::select("SELECT distance({$store->latitude},{$store->longitude},{$address->latitude},{$address->longitude}) as distance")[0]->distance;
+        $distanceInKm = DB::selectOne("SELECT distance({$store->latitude},{$store->longitude},{$address->latitude},{$address->longitude}) as distance")->distance;
         if ($store->delivery_range < $distanceInKm) {
             $response = [
                 'success' => false,
@@ -114,6 +114,7 @@ class OrderController extends Controller
         
         $storeOrdersCount = $store->orders()
             ->whereIn('status', ['pending', 'processing', 'out_for_delivery'])
+            // ->whereId('!=', $order->id)
             ->count();
         $orderProductsCount = $order->products()->count();
         $shippingPriceFixed = config('app.shipping_price.fixed');
@@ -123,12 +124,7 @@ class OrderController extends Controller
         $order->shipping_price = $shippingPriceFixed + ($shippingPricePerKm * $distanceInKm);
 
         
-        /**
-         * Check Payment Method
-         */
-        if ($order->payment_method === 'card') {
-            // payment_id
-        }
+        
 
         /**
          * Check Coupon discount
@@ -165,11 +161,21 @@ class OrderController extends Controller
         $order->total_price = $order->products_price + $order->shipping_price - $order->discount + $order->tip;
         $order->save();
 
+        /**
+         * Check Payment Method
+         */
+        $vivaRedirectUrl = null;
+        if ($order->payment_method === 'card') {
+            $order->createVivaCode();
+            $vivaRedirectUrl = $order->getVivaUrl();
+        }
+
         $response = [
             'success' => true,
             'message' => 'Order created',
             'data' => [
-                'order' => $order->refresh()
+                'order' => $order->refresh(),
+                'viva_redirect_url' => $vivaRedirectUrl,
             ]
         ];
         return response()->json($response, 201);
