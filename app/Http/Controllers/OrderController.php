@@ -8,6 +8,9 @@ use App\Models\OrderProduct;
 use App\Models\Store;
 use DB;
 use Illuminate\Http\Request;
+use Sebdesign\VivaPayments\Enums\TransactionStatus;
+use Sebdesign\VivaPayments\Facades\Viva;
+use Sebdesign\VivaPayments\VivaException;
 
 class OrderController extends Controller
 {
@@ -120,8 +123,8 @@ class OrderController extends Controller
         $shippingPriceFixed = config('app.shipping_price.fixed');
         $shippingPricePerKm = config('app.shipping_price.price_per_km');
         
-        $order->delivery_time = ($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm);
-        $order->shipping_price = $shippingPriceFixed + ($shippingPricePerKm * $distanceInKm);
+        $order->delivery_time = abs(($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm));
+        $order->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $distanceInKm), 2);
 
         
         
@@ -129,6 +132,7 @@ class OrderController extends Controller
         /**
          * Check Coupon discount
          */
+        $order->discount = 0;
         if ($request->has('coupon_code')) {
             $couponIsValid = true;
             $coupon = Coupon::where('code', $request->coupon_code)
@@ -207,5 +211,36 @@ class OrderController extends Controller
         ];
 
         return response()->json($response);
+    }
+
+    public function vivaReturn(Request $request){
+        try {
+            $transaction = Viva::transactions()->retrieve($request->input('t'));
+        } catch (VivaException $e) {
+            //
+        }
+
+        $orderId = str_replace("order", "", $transaction->merchantTrns);
+        $order = Order::find($orderId);
+        if(!$order){
+            $response = [
+               'success' => false,
+               'message' => 'Order not found'
+            ];
+            return response()->json($response, 404);
+        }
+
+        if($transaction->statusId === TransactionStatus::PaymentSuccessful){
+            $order->payment_status = 'completed';
+            $order->status = 'processing';
+            // notify store
+        }
+        else if($transaction->statusId === TransactionStatus::Error){
+            $order->payment_status = 'failed';
+            $order->status = 'cancelled';
+        }
+        $order->save();
+        
+        return redirect()->to(env('CLIENT_URL') . "/orders/{$order->id}");
     }
 }

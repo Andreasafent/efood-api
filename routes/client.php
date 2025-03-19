@@ -16,6 +16,9 @@ Route::get('/', function () {
 Route::prefix('auth')->group(base_path('routes/auth.php'));
 
 Route::get("categories",  [CategoryController::class, 'index']);
+
+Route::any("viva/return",[OrderController::class, 'vivaReturn']);
+
 Route::prefix('stores')
     ->controller(StoreController::class)
     ->group(function(){
