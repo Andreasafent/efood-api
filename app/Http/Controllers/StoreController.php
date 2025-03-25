@@ -147,6 +147,18 @@ class StoreController extends Controller
         ]);
 
         $store = $query->first();
+
+
+        $shippingPriceFixed = config('app.shipping_price.fixed');
+        $shippingPricePerKm = config('app.shipping_price.price_per_km');
+        $store->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $store->distance), 1);
+        
+        $store->append(["logo", "cover"]);
+        foreach($store->productCategories as $category) {
+            $category->products->each->append(["main_image"]);
+        }
+
+
         $response = [
             'success' => true,
             'message' => 'Store details',
