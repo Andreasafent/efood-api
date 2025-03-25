@@ -77,6 +77,13 @@ class StoreController extends Controller
 
         $stores->each->append(["logo", "cover"]);
 
+        $shippingPriceFixed = config('app.shipping_price.fixed');
+        $shippingPricePerKm = config('app.shipping_price.price_per_km');
+
+        $stores->each(function ($store) use ($shippingPriceFixed, $shippingPricePerKm) {
+            $store->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $store->distance), 1);
+        });
+
         $response = [
             'success' => true,
             'message' => 'List of all stores',
