@@ -12,14 +12,26 @@ use App\Helpers\Device;
 class AuthController extends Controller
 {
 
+    public function me(Request $request)
+    {
+        return response()->json([
+                "success" => true,
+                "message" => "User retrieved",
+                "data" => [
+                    "user" => $request->user()
+                ]
+            ]
+        );
+    }
+
     public function register(Request $request)
     {
 
-        if($request->role && $request->role === 'admin'){
+        if ($request->role && $request->role === 'admin') {
             return response()->json([
                 'success' => false,
                 'message' => 'Page not found',
-            ], 404);            
+            ], 404);
         }
 
         $fields = $request->validate([
@@ -36,21 +48,21 @@ class AuthController extends Controller
             'password' => bcrypt($fields['password'])
         ]);
 
-        if($request->role){
-            $role = Role::find( RoleCode::{$request->role});
-            if($role){
+        if ($request->role) {
+            $role = Role::find(RoleCode::{$request->role});
+            if ($role) {
                 $user->roles()->attach($role->id);
             }
         }
 
-        
+
 
         $token = $user->createToken(Device::tokenName())->plainTextToken;
 
         $response = [
             'success' => true,
             'message' => 'User registered',
-            'data'=>[
+            'data' => [
                 'user' => $user,
                 'token' => $token
             ]
@@ -84,14 +96,14 @@ class AuthController extends Controller
             ], 401);
         }
 
-        if($request->role){
-            
+        if ($request->role) {
+
             $role = $user->roles()->where('role_id', RoleCode::{$request->role})->first();
-            if(!$role){
+            if (!$role) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unauthorized'
-                ], 401);                    
+                ], 401);
             }
         }
 
@@ -100,7 +112,7 @@ class AuthController extends Controller
         $response = [
             'success' => true,
             'message' => 'User logged in successfully',
-            'data'=>[
+            'data' => [
                 'user' => $user,
                 'token' => $token,
             ]

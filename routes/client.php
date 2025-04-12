@@ -15,41 +15,42 @@ Route::get('/', function () {
 
 Route::prefix('auth')->group(base_path('routes/auth.php'));
 
-Route::get("categories",  [CategoryController::class, 'index']);
+Route::get("categories", [CategoryController::class, 'index']);
 
-Route::any("viva/return",[OrderController::class, 'vivaReturn']);
+Route::any("viva/return", [OrderController::class, 'vivaReturn']);
 
 Route::prefix('stores')
     ->controller(StoreController::class)
-    ->group(function(){
-        Route::get("",  'index');
-        Route::get("{id}",  'show');
+    ->group(function () {
+        Route::get("", 'index');
+        Route::get("{id}", 'show');
     });
 
-Route::middleware(['auth:sanctum'])
-    ->controller(UserController::class)
-    ->group(function(){
-        Route::prefix("users")->group(function(){
-            Route::get("me",  'me');
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    Route::prefix("users")
+        ->controller(UserController::class)
+        ->group(function () {
+            Route::get("me", 'me');
             Route::get("tokens", 'tokens');
             Route::delete("revoke-all-tokens", 'revokeAllTokens');
-    });
+        });
 
     Route::prefix("addresses")
         ->controller(AddressController::class)
-        ->group(function(){
-            Route::get("",  'index');
-            Route::post("",  'store');
-            Route::get("{id}",  'show');
-            Route::delete("{id}",  'destroy');
-    });
+        ->group(function () {
+            Route::get("", 'index');
+            Route::post("", 'store');
+            Route::get("{id}", 'show');
+            Route::delete("{id}", 'destroy');
+        });
 
     Route::prefix("orders")
         ->controller(OrderController::class)
-        ->group(function(){
-            Route::get("",  'index');
-            Route::post("",  'store');
-            Route::get("{id}",  'show');
-    });
-
+        ->group(function () {
+            Route::get("", 'index');
+            Route::post("", 'store');
+            Route::get("{id}", 'show');
+        });
 });
+
