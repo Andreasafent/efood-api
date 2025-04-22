@@ -243,4 +243,6 @@ class OrderController extends Controller
         
         return redirect()->to(env('CLIENT_URL') . "/orders/{$order->id}");
     }
+
+    
 }
