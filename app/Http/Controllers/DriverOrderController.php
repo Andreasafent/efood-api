@@ -3,17 +3,185 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use DB;
 use Illuminate\Http\Request;
 
 class DriverOrderController extends Controller
 {
+
     public function nearbyOrders(Request $request)
     {
+        $driver_commission = config('app.driver_commission.percentage');
+
+        $lat = $request->coordinates['latitude'];
+        $lng = $request->coordinates['longitude'];
+
+        $query = Order::query();
+        $query->select([
+            'orders.id',
+            'orders.store_id',
+            'orders.address_id',
+            'orders.user_id',
+            'orders.payment_method'
+        ]);
+        $query->addSelect(DB::raw('(orders.shipping_price * ' . $driver_commission . ') as driver_commission'));
+        $query->addSelect(DB::raw('distance(stores.latitude, stores.longitude, ' . $lat . ', ' . $lng . ') as store_distance'));
+        $query->addSelect(DB::raw('distance(stores.latitude, stores.longitude, addresses.latitude, addresses.longitude) as address_distance'));
+        $query->where('orders.status', 'pending');
+        $query->where('orders.shipping_method', operator: 'delivery');
+        $query->where('orders.driver_id', null);
+
+        $query->join('stores', 'stores.id', '=', 'orders.store_id');
+        $query->join('addresses', 'addresses.id', '=', 'orders.address_id');
+
+        $query->with([
+            'address' => function ($query) {
+                $query->select([
+                    'id',
+                    'street',
+                    'number',
+                    'postal_code',
+                    'latitude',
+                    'longitude'
+                ]);
+            },
+            'user' => function ($query) {
+                $query->select([
+                    'id',
+                    'name'
+                ]);
+            },
+            'store' => function ($query) {
+                $query->select([
+                    'id',
+                    'name',
+                    'address',
+                    'latitude',
+                    'longitude'
+                ]);
+            }
+        ]);
+
+        $orders = $query->get();
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No orders found',
+                'data' => []
+            ]);
+        }
+
+        $orders->each(function($order){
+            $order->store->append('cover');
+            $order->store->append('logo');
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'List of all orders',
             'data' => [
-                'orders' => Order::select("id")->get()
+                'orders' => $orders
+            ]
+        ]);
+    }
+
+    public function takeOrder(Request $request){
+        $order = Order::find($request->order_id);
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ]);
+        }
+
+        if ($order->driver_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order already taken'
+            ]);
+        }
+
+        $order->driver_id = $request->user()->id;
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order taken successfully'
+        ]);
+    }
+
+    public function orderDetails($id, Request $request)
+    {
+        $driver = $request->user();
+        $driver_commission = config('app.driver_commission.percentage');
+
+        $lat = $request->coordinates['latitude'];
+        $lng = $request->coordinates['longitude'];
+
+        $query = Order::query();
+        $query->select([
+            'orders.id',
+            'orders.store_id',
+            'orders.address_id',
+            'orders.user_id',
+            'orders.payment_method',
+            'orders.payment_status',
+            'orders.status',
+            'orders.shipping_status',
+            'orders.total_price',
+        ]);
+        $query->addSelect(DB::raw('(orders.shipping_price * ' . $driver_commission . ') as driver_commission'));
+        $query->addSelect(DB::raw('distance(stores.latitude, stores.longitude, ' . $lat . ', ' . $lng . ') as store_distance'));
+        $query->addSelect(DB::raw('distance(stores.latitude, stores.longitude, addresses.latitude, addresses.longitude) as address_distance'));
+
+        $query->join('stores', 'stores.id', '=', 'orders.store_id');
+        $query->join('addresses', 'addresses.id', '=', 'orders.address_id');
+
+        $query->where('orders.id', $id);
+        $query->where('orders.driver_id', $driver->id);
+
+        $query->with([
+            'address' => function ($query) {
+                $query->select([
+                    'id',
+                    'street',
+                    'number',
+                    'postal_code',
+                    'latitude',
+                    'longitude'
+                ]);
+            },
+            'user' => function ($query) {
+                $query->select([
+                    'id',
+                    'name'
+                ]);
+            },
+            'store' => function ($query) {
+                $query->select([
+                    'id',
+                    'name',
+                    'address',
+                    'latitude',
+                    'longitude'
+                ]);
+            }
+        ]);
+
+        $order = $query->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order details retrieved successfully',
+            'data' => [
+                'order' => $order
             ]
         ]);
     }

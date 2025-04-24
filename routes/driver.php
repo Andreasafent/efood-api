@@ -17,5 +17,7 @@ Route::middleware(['auth:sanctum', 'checkRole:driver'])->group(function(){
         ->controller(DriverOrderController::class)
         ->group(function() {
             Route::get("nearby", 'nearbyOrders');
+            Route::post("take", 'takeOrder');
+            Route::get("details/{id}", 'orderDetails');
         });
 });
