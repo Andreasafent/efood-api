@@ -186,4 +186,136 @@ class DriverOrderController extends Controller
         ]);
     }
 
+    public function startDelivery(Request $request)
+    {
+        $driver = $request->user();
+        $order = Order::find($request->order_id);
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ]);
+        }
+
+        if ($order->driver_id !== $driver->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order belongs to another driver'
+            ]);
+        }
+
+        if ($order->status !== 'processing') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order is not in processing status'
+            ]);
+        }
+
+        $order->status = "out_for_delivery";
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order updated successfully'
+        ]);
+    }
+
+    public function completePayment(Request $request)
+    {
+        $driver = $request->user();
+        $order = Order::find($request->order_id);
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ]);
+        }
+
+        if ($order->driver_id !== $driver->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order belongs to another driver'
+            ]);
+        }
+
+        if ($order->status !== 'out_for_delivery') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order is not in out for delivery status'
+            ]);
+        }
+
+        if ($order->payment_method !== 'cod') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order is not cash on delivery'
+            ]);
+        }
+
+        if ($order->payment_status !== 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order payment is not pending'
+            ]);
+        }
+
+        $order->payment_status = "completed";
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order payment completed successfully'
+        ]);
+    }
+
+    public function completeDelivery(Request $request)
+    {
+        $driver = $request->user();
+        $order = Order::find($request->order_id);
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found'
+            ]);
+        }
+
+        if ($order->driver_id !== $driver->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order belongs to another driver'
+            ]);
+        }
+
+        if ($order->status !== 'out_for_delivery') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order is not in out for delivery status'
+            ]);
+        }
+
+        if (
+            !(
+                $order->payment_method === "card"
+                || (
+                    $order->payment_method === "cod" &&
+                    $order->payment_status === 'completed'
+                )
+            )
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order is not paid'
+            ]);
+        }
+
+        $order->shipping_status = "completed";
+        $order->status = "completed";
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order updated successfully'
+        ]);
+    }
+
 }

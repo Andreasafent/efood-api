@@ -19,5 +19,8 @@ Route::middleware(['auth:sanctum', 'checkRole:driver'])->group(function(){
             Route::get("nearby", 'nearbyOrders');
             Route::post("take", 'takeOrder');
             Route::get("details/{id}", 'orderDetails');
+            Route::post("start-delivery", 'startDelivery');
+            Route::post("complete-payment", 'completePayment');
+            Route::post("complete-delivery", 'completeDelivery');
         });
 });
