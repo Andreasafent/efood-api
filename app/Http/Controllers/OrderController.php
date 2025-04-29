@@ -21,20 +21,34 @@ class OrderController extends Controller
     {
         $user = $request->user();
         $orders = $user->orders()
-            ->with('store', 'address', 'products')
+            ->with([
+                'products.product',
+                'store'
+            ])
             ->orderByDesc('created_at')
             ->get();
+
+
+        foreach ($orders as $order) {
+            foreach ($order->products as $product) {
+                $product->product->append('main_image');
+            }
+            $order->store->append('logo');
+            $order->store->append('cover');
+        }
 
         $response = [
             'success' => true,
             'message' => 'List of all orders',
-            'data' => $orders
+            'data' => [
+                'orders' => $orders,
+            ]
         ];
 
         return response()->json($response);
     }
 
-    
+
 
     /**
      * Store a newly created resource in storage.
@@ -114,7 +128,7 @@ class OrderController extends Controller
         $minPerItem = config('app.delivery_time.minutes_per_item');
         $minPerKm = config('app.delivery_time.minutes_per_km');
         // $minPerDriverOrder = config('app.delivery_time.minutes_per_driver_order');
-        
+
         $storeOrdersCount = $store->orders()
             ->whereIn('status', ['pending', 'processing', 'out_for_delivery'])
             // ->whereId('!=', $order->id)
@@ -122,12 +136,12 @@ class OrderController extends Controller
         $orderProductsCount = $order->products()->count();
         $shippingPriceFixed = config('app.shipping_price.fixed');
         $shippingPricePerKm = config('app.shipping_price.price_per_km');
-        
+
         $order->delivery_time = abs(($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm));
         $order->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $distanceInKm), 2);
 
-        
-        
+
+
 
         /**
          * Check Coupon discount
@@ -145,7 +159,7 @@ class OrderController extends Controller
                 if ($coupon->start_date && $coupon->start_date->isFuture()) {
                     $couponIsValid = false;
                 }
-    
+
                 if ($coupon->end_date && $coupon->end_date->isPast()) {
                     $couponIsValid = false;
                 }
@@ -191,9 +205,15 @@ class OrderController extends Controller
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        $orders = $user->orders()->find($id);
+        $order = $user->orders()
+            ->with([
+                'products.product',
+                'store',
+                'address'
+            ])
+            ->find($id);
 
-        if (!$orders) {
+        if (!$order) {
             $response = [
                 'success' => false,
                 'message' => 'Order not found'
@@ -202,18 +222,24 @@ class OrderController extends Controller
             return response()->json($response, 404);
         }
 
+        foreach ($order->products as $product) {
+            $product->product->append('mainImage');
+        }
+        $order->store->append('logo');
+
         $response = [
             'success' => true,
             'message' => 'Order details',
             'data' => [
-                'order' => $orders,
+                'order' => $order,
             ]
         ];
 
         return response()->json($response);
     }
 
-    public function vivaReturn(Request $request){
+    public function vivaReturn(Request $request)
+    {
         try {
             $transaction = Viva::transactions()->retrieve($request->input('t'));
         } catch (VivaException $e) {
@@ -222,27 +248,26 @@ class OrderController extends Controller
 
         $orderId = str_replace("order", "", $transaction->merchantTrns);
         $order = Order::find($orderId);
-        if(!$order){
+        if (!$order) {
             $response = [
-               'success' => false,
-               'message' => 'Order not found'
+                'success' => false,
+                'message' => 'Order not found'
             ];
             return response()->json($response, 404);
         }
 
-        if($transaction->statusId === TransactionStatus::PaymentSuccessful){
+        if ($transaction->statusId === TransactionStatus::PaymentSuccessful) {
             $order->payment_status = 'completed';
             $order->status = 'processing';
             // notify store
-        }
-        else if($transaction->statusId === TransactionStatus::Error){
+        } else if ($transaction->statusId === TransactionStatus::Error) {
             $order->payment_status = 'failed';
             $order->status = 'cancelled';
         }
         $order->save();
-        
+
         return redirect()->to(env('CLIENT_URL') . "/orders/{$order->id}");
     }
 
-    
+
 }
