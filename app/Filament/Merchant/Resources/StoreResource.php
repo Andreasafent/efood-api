@@ -31,7 +31,7 @@ class StoreResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where("user_id", auth()->user()->id);
+            ->where("user_id", auth()->id());
     }
 
     public static function form(Form $form): Form
@@ -51,7 +51,7 @@ class StoreResource extends Resource
                         Select::make('categories')
                             ->preload()
                             ->multiple()
-                            ->relationship(titleAttribute:'name'),
+                            ->relationship(titleAttribute: 'name'),
                         TextInput::make('phone')
                             ->tel()
                     ]),

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Sebdesign\VivaPayments\Facades\Viva;
 use Sebdesign\VivaPayments\Requests\CreatePaymentOrder;
@@ -36,6 +37,8 @@ class Order extends Model
         'shipping_price' => 'float',
         'discount' => 'float',
         'tip' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
     
     public function user()
