@@ -91,7 +91,7 @@ class OrderResource extends Resource
                             ->columnSpan(2)
                             ->columns(3),
                         OrderNoteEntry::make("note")
-                            ->hidden(fn ($record): bool => !$record->note)
+                            ->hidden(fn($record): bool => !$record->note)
                             ->columnSpan(2),
                         TextEntry::make('address.full_address')
                             ->columnSpan(1)
@@ -186,7 +186,7 @@ class OrderResource extends Resource
                                     ->money('EUR'),
 
                                 OrderNoteEntry::make('note')
-                                    ->hidden(fn ($record): bool => !$record->note)
+                                    ->hidden(fn($record): bool => !$record->note)
                                     ->columnSpanFull(),
                             ])
                             ->columns(5)
@@ -246,6 +246,16 @@ class OrderResource extends Resource
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->since(),
+                // SelectColumn::make('status')
+                //     ->extraAttributes(function ($state) {
+                //         $bgColor = OrderStatus::from($state)->color();
+                //         return ['class' => "bg-{$bgColor}-500"];
+                //     })
+                //     ->options(
+                //         collect(OrderStatus::cases())
+                //             ->mapWithKeys(fn($enum) => [$enum->value => $enum->name])
+                //             ->toArray()
+                //     ),
                 TextColumn::make("status")
                     ->badge()
                     ->color(function ($state) {
