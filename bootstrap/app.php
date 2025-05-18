@@ -4,6 +4,7 @@ use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\CoordinatesDetector;
 use App\Http\Middleware\Locale;
 use App\Http\Middleware\SetAuthRole;
+use App\Http\Middleware\SocketAuth;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,7 +21,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(CoordinatesDetector::class);
         $middleware->alias([
             'setAuthRole' => SetAuthRole::class,
-            'checkRole' => CheckRole::class
+            'checkRole' => CheckRole::class,
+            'auth.socket' => SocketAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
